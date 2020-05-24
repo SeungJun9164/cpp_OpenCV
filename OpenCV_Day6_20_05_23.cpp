@@ -1,40 +1,39 @@
 #include <opencv2/opencv.hpp>
 
-#include <iostream>
-
 int main() {
 
-	cv::Mat frame;
 	cv::Mat old_frame;
 	cv::Mat sub_frame;
-	cv::VideoCapture cap(0);
-	int width = cap.get(cv::CAP_PROP_FRAME_WIDTH); //ÇÁ·¹ÀÓ Å©±â
-	int height = cap.get(cv::CAP_PROP_FRAME_HEIGHT); //ÇÁ·¹ÀÓ Å©±â
-	int fourcc = cv::VideoWriter::fourcc('X', 'V', 'I', 'D');
-	int fps = cap.get(cv::CAP_PROP_FPS);
 
-	//cv::VideoCapture stream1(1); //À¥Ä·
+	cv::VideoCapture cap1("Video2.mp4");
+	if (!cap1.isOpened()) {
+		std::cout << "ë™ì˜ìƒ íŒŒì¼ì„ ì—´ ìˆ˜ ì—†ìŠµë‹ˆë‹¤.\n";
+	}
 
-	cv::VideoWriter outputVideo;
-	outputVideo.open("output.avi", -1, fps, cv::Size(width, height), true);
+	cap1.set(cv::CAP_PROP_FRAME_WIDTH, 320);
+	cap1.set(cv::CAP_PROP_FRAME_HEIGHT, 240);
+
+	cv::Mat frame1;
+	cv::namedWindow("video", 1);
+
 	while (1) {
-		cap.read(frame); //Ä«¸Þ¶ó·ÎºÎÅÍ ÀÌ¹ÌÁö ÇÑÀå °¡Á®¿À±â
-		if (frame.empty()) {
-			std::cerr << "Ä¸ÃÄ ½ÇÆÐ\n";
-			break;
+		cap1.read(frame1);
+
+		if (old_frame.empty()) {
+			old_frame = frame1.clone(); //old_frameì— í˜„ìž¬ í”„ë ˆìž„ ë„£ì–´ì£¼ê¸°
+			continue;
 		}
 
-		cvtColor(frame, frame, cv::COLOR_BGR2GRAY);
-		//1¹øÂ° ÀÎ¼ö·Î ÁöÁ¤µÈ ÀÌ¹ÌÁö¸¦ 3¹øÂ° ÀÎ¼öÇü½ÄÀ¸·Î ¹Ù²Û ÈÄ ÀÌ¹ÌÁö¸¦ 2¹øÂ° ÀÎ¼ö·Î µ¹·ÁÁÜ
+		cv::subtract(old_frame, frame1, sub_frame);
+		//frame1ì—ì„œ old_frameì„ ë¹¼ì–´ sub_frameì— ë„£ì–´ë¼
 
-		imshow("Live", frame);
+		cv::imshow("video", frame1);
+		cv::imshow("sub_frame", sub_frame);
 
-		//outputVideo.write(frame);
+		old_frame = frame1.clone();
+		//ì´ ë¬¸ìž¥ì„ ì£¼ì„ì²˜ë¦¬í•˜ë©´ ë°°ê²½ì°¨ì´ë¡œ ì›€ì§ìž„ì„ í™•ì¸ í•  ìˆ˜ ìžˆë‹¤.
 
-
-		int wait = int(1.0 / fps * 1000);//ÀÌ¹ÌÁö¸¦ °¡Á®¿À´Â »çÀÌÀÇ ´ë±â½Ã°£
-		if (cv::waitKey(wait) >= 0)
-			break;
+		if (cv::waitKey(20) >= 0) break;
 	}
 	return 0;
 }
